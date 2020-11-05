@@ -656,6 +656,9 @@ impl<Exe: Executor> ConsumerEngine<Exe> {
             RawMessage { command: BaseCommand { message: Some(_), .. }, payload: None } => {
                 error!("Consumer {} received message without payload", self.debug_format());
             }
+            RawMessage { command: BaseCommand { close_consumer: Some(_), .. }, .. } => {
+                self.reconnect().await?;
+            }
             unexpected => {
                 let type_ = proto::base_command::Type::try_from(unexpected.command.type_)
                     .map(|t| format!("{:?}", t))
